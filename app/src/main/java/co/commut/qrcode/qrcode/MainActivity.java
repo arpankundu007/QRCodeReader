@@ -14,9 +14,8 @@ import com.google.zxing.Result;
 
 import me.dm7.barcodescanner.zxing.ZXingScannerView;
 
-public class MainActivity extends AppCompatActivity implements ZXingScannerView.ResultHandler {
+public class MainActivity extends AppCompatActivity {
 
-    private ZXingScannerView mScannerView;
     Button scanQR;
     TextView scanResult;
 
@@ -24,50 +23,20 @@ public class MainActivity extends AppCompatActivity implements ZXingScannerView.
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        mScannerView = new ZXingScannerView(MainActivity.this);
+        scanResult = (TextView) findViewById(R.id.textView);
         scanQR = (Button) findViewById(R.id.scanbutton);
-
+        if(getIntent().getStringExtra("scanData") != null) {
+            Log.v("intent stat", "Intent not null");
+            Intent receive = getIntent();
+            String data = receive.getStringExtra("scanData");
+            scanResult.setText(data.toString());
+        }
         scanQR.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                setContentView(mScannerView);
-                mScannerView.setResultHandler( MainActivity.this);
-                mScannerView.startCamera();
+                Intent intent = new Intent(MainActivity.this, ScannerActivity.class);
+                startActivity(intent);
             }
         });
-    }
-
-    @Override
-    protected void onPause() {
-        super.onPause();
-        mScannerView.stopCamera();
-    }
-
-    @Override
-    public void handleResult(final Result result) {
-        //Do anything with result here :D
-        Log.w("handleResult", result.getText());
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle("Scan result");
-        builder.setMessage(result.getText()).setCancelable(false);
-        builder.setPositiveButton("Proceed", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                dialog.cancel();
-                reinitViewsAndSetResult(result.getText().toString());
-            }
-        });
-
-        AlertDialog alertDialog = builder.create();
-        alertDialog.show();
-
-        //Resume scanning
-        //mScannerView.resumeCameraPreview(this);
-    }
-
-    public void reinitViewsAndSetResult(String string){
-        setContentView(R.layout.activity_main);
-        scanResult = (TextView) findViewById(R.id.textView);
-        scanResult.setText(string);
     }
 }
